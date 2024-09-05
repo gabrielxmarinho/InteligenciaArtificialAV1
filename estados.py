@@ -166,7 +166,7 @@ class Estado:
             # Se a matriz já foi passada como parâmetro, não é necessário criar randomicamente
             self.n = n
             self.matriz = matriz
-
+# Buscas Cegas
 def buscaEmLargura(estadoInicial : Estado, estadoFinal: Estado):
     fila = [estadoInicial.matriz]
     while estadoFinal.matriz not in fila:
