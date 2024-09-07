@@ -1,6 +1,7 @@
 import copy
 import random
 import math
+import time
 class Estado:
     def estados2(self,i,j):
         # Copiando a matriz
@@ -179,53 +180,49 @@ def buscaEmLargura(estadoInicial : Estado, estadoFinal: Estado):
     return len(fila)
 
 def buscaEmProfundidade(estadoInicial: Estado ,estadoFinal : Estado):
-    cont=0
-    fila = [estadoInicial]
-    while fila[0].matriz != estadoFinal.matriz:
-        fila[0].imprimirMatriz()
-        cont+=1
-        novasMatrizes = fila[0].movimentos()
+    lista = [estadoInicial]
+    while lista[0].matriz != estadoFinal.matriz:
+        lista[0].imprimirMatriz()
+        novasMatrizes = lista[0].movimentos()
         index = 1
         for matriz in novasMatrizes:
-            fila.insert(index,Estado(len(matriz),matriz))
+            lista.insert(index,Estado(len(matriz),matriz))
             index+=1
-        fila.pop(0)
-    return cont
+        lista.pop(0)
+    return len(lista)
 
-def buscaIterativaEmProfundidade(estadoInicial : Estado,estadoFinal : Estado,limite=5):
-    cont=0
+def buscaIterativaEmProfundidade(estadoInicial : Estado,estadoFinal : Estado,limite=10):
     nivel = 0
-    fila = [estadoInicial]
+    lista = [estadoInicial]
     print("Estado Inicial")
-    while fila[0].matriz != estadoFinal.matriz:
-        cont+=1
+    while lista[0].matriz != estadoFinal.matriz:
         if nivel<limite:
-            fila[0].imprimirMatriz()
-            novasMatrizes = fila[0].movimentos()
+            lista[0].imprimirMatriz()
+            novasMatrizes = lista[0].movimentos()
             index = 1
             for matriz in novasMatrizes:
-                fila.insert(index,Estado(len(matriz),matriz))
+                lista.insert(index,Estado(len(matriz),matriz))
                 index+=1
-            fila.pop(0)
+            lista.pop(0)
             nivel+=1
         elif nivel==limite:
             # Cheguei até o limite da profundidade
             for i in range(0,len(novasMatrizes)):
-                if fila[0].matriz != estadoFinal.matriz:
-                    fila[0].imprimirMatriz()
-                    cont+=1
-                    fila.pop(0)
+                if lista[0].matriz != estadoFinal.matriz:
+                    lista[0].imprimirMatriz()
+                    lista.pop(0)
                 else:
-                    fila[0].imprimirMatriz()
-                    return cont
+                    lista[0].imprimirMatriz()
+                    return len(lista)
             nivel-=1
-        if len(fila)==0:
-            fila=[estadoInicial]
+        if len(lista)==0:
+            nivel = 0
+            lista=[estadoInicial]
             # Incrementando o Limite
             limite+=1
             
-    fila[0].imprimirMatriz()
-    return cont
+    lista[0].imprimirMatriz()
+    return len(lista)
 
 # Heurística 1(Número de Peças na posição Correta)
 def posicoesCorretas(estadoInicial : Estado,estadoFinal : Estado):
@@ -249,7 +246,7 @@ def movimentosFaltantes(movimentosdoEstado, estadoFinal : Estado,cont=1):
             return cont+1
     return movimentosFaltantes(novasMatrizes,estadoFinal,cont+1)
 
-def buscaHeuristica(estadoInicial : Estado, estadoFinal : Estado):
+def buscaHeuristica(estadoInicial : Estado, estadoFinal : Estado,fila):
     estadoInicial.imprimirMatriz()
     novasMatrizes = estadoInicial.movimentos()
     menor = math.inf
@@ -265,15 +262,22 @@ def buscaHeuristica(estadoInicial : Estado, estadoFinal : Estado):
                 melhorEstado = estado
     if melhorEstado.matriz == estadoFinal.matriz:
         melhorEstado.imprimirMatriz()
+        fila.append(melhorEstado)
+        return len(fila)
     else:
-        buscaHeuristica(melhorEstado,estadoFinal)
+        fila.append(melhorEstado)
+        return buscaHeuristica(melhorEstado,estadoFinal,fila)
+inicio = time.time()
 #main            
-num = 3
+num = 4
 # Exemplo simples de Matriz Inicial
-matrizInicial = [[2, 3, 4], [1, 5, 6], [7, " ", 8]]
+# matrizInicial = [[2, " ", 3], [1, 4, 5], [8, 7, 6]]
+matrizInicial = [[2,13,3,4],[1,9,14,5],[12,15, " ", 6],[11,10,8,7]]
 # Criando o Estado Inicial
 estadoInicial = Estado(num,matrizInicial)
-matrizFinal = [[1, 2, 3], [8, " ", 4], [7, 6, 5]]
+matrizFinal = [[1,2,3,4],[12,13,14,5],[11," ", 15, 6],[10,9,8,7]]
 estadoFinal = Estado(num, matrizFinal)
 # print(f"Total de Buscas = {buscaIterativaEmProfundidade(estadoInicial,estadoFinal)}")
-buscaHeuristica(estadoInicial,estadoFinal)
+print(f"Memoria = {buscaHeuristica(estadoInicial,estadoFinal[estadoInicial])}")
+fim = time.time()
+print(fim - inicio)
